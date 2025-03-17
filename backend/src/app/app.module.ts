@@ -19,7 +19,7 @@ import configuration from 'src/configuration';
         dialect: 'postgres',
         host: configService.get('db_host'),
         port: configService.get('db_port'),
-        username: configService.get('db_username'),
+        username: configService.get('db_user'),
         password: configService.get('db_password'),
         database: configService.get('db_name'),
         synchronize: true,

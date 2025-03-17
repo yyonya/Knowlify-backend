@@ -3,11 +3,11 @@ services:
     image: postgres
     container_name: postgres_container
     environment:
-      POSTGRES_USER: "leonleon"
+      POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "H%p@yHEreF"
-      POSTGRES_DB: "knowlify"
+      POSTGRES_DB: "postgres"
     ports:
-      - "5432:5432"
+      - "50000:5432"
     restart: always
 
   pgadmin:
