@@ -8,4 +8,8 @@ export class User extends Model {
   name: string;
   @Column
   password_hash: string;
+  @Column
+  storage_limit: number;
+  @Column
+  storage_now: number;
 }
