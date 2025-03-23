@@ -4,11 +4,13 @@ import { User } from 'src/models/user.model';
 import * as argon2 from 'argon2';
 import { LoginUserDto, RegisterUserDto, ResponseLoginUserDto } from './dto';
 import { ErrorLog } from 'src/errors';
+import { TokenService } from 'src/token/token.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User) private readonly userRepository: typeof User,
+    private readonly tokenService: TokenService,
   ) {}
 
   async passwordHash(password: string): Promise<string> {
@@ -29,15 +31,17 @@ export class UsersService {
       throw new BadRequestException(ErrorLog.USER_EXIST);
     }
     dto.password = await this.passwordHash(dto.password);
-    await this.userRepository.create({
+    const newUser = await this.userRepository.create({
       email: dto.email,
       name: dto.name,
       password_hash: dto.password,
       storage_limit: 2048,
       storage_now: 0,
     });
-    return { email: dto.email, name: dto.name };
+    const token = await this.tokenService.generateJwtToken(newUser.id);
+    return { email: dto.email, name: dto.name, token: token };
   }
+
   async loginUser(dto: LoginUserDto): Promise<ResponseLoginUserDto> {
     const userExistCheck = await this.findUserByEmail(dto.email);
     if (!userExistCheck) {
@@ -50,6 +54,11 @@ export class UsersService {
     if (!passwordCheck) {
       throw new BadRequestException(ErrorLog.LOGIN_FAILTURE);
     }
-    return { email: userExistCheck.email, name: userExistCheck.name };
+    const token = await this.tokenService.generateJwtToken(userExistCheck.id);
+    return {
+      email: userExistCheck.email,
+      name: userExistCheck.name,
+      token: token,
+    };
   }
 }

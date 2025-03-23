@@ -21,6 +21,6 @@ export class ResponseLoginUserDto {
   email: string;
   @IsString()
   name: string;
-  // @IsString()
-  // token: string;
+  @IsString()
+  token: string;
 }
