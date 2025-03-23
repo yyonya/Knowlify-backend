@@ -5,12 +5,14 @@ import * as argon2 from 'argon2';
 import { LoginUserDto, RegisterUserDto, ResponseLoginUserDto } from './dto';
 import { ErrorLog } from 'src/errors';
 import { TokenService } from 'src/token/token.service';
+import { WorkspaceService } from 'src/workspace/workspace.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User) private readonly userRepository: typeof User,
     private readonly tokenService: TokenService,
+    private readonly workspaceService: WorkspaceService,
   ) {}
 
   async passwordHash(password: string): Promise<string> {
@@ -36,9 +38,13 @@ export class UsersService {
       name: dto.name,
       password_hash: dto.password,
       storage_limit: 2048,
-      storage_now: 0,
+      storage: 0,
     });
-    const token = await this.tokenService.generateJwtToken(newUser.id);
+    await this.workspaceService.createWorkspace(
+      { name: 'MyWorkspace', all_size: newUser.storage, page_count: 1 },
+      newUser.User_id,
+    );
+    const token = await this.tokenService.generateJwtToken(newUser.User_id);
     return { email: dto.email, name: dto.name, token: token };
   }
 
@@ -54,7 +60,9 @@ export class UsersService {
     if (!passwordCheck) {
       throw new BadRequestException(ErrorLog.LOGIN_FAILTURE);
     }
-    const token = await this.tokenService.generateJwtToken(userExistCheck.id);
+    const token = await this.tokenService.generateJwtToken(
+      userExistCheck.User_id,
+    );
     return {
       email: userExistCheck.email,
       name: userExistCheck.name,

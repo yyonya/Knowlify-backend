@@ -1,7 +1,19 @@
-import { Column, Model, Table } from 'sequelize-typescript';
+import {
+  AutoIncrement,
+  Column,
+  HasOne,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { Workspace } from './workspace.model';
 
 @Table
 export class User extends Model {
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  User_id: number;
   @Column
   email: string;
   @Column
@@ -11,5 +23,10 @@ export class User extends Model {
   @Column
   storage_limit: number;
   @Column
-  storage_now: number;
+  storage: number;
+  @HasOne(() => Workspace, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  workspace: Workspace;
 }

@@ -7,6 +7,8 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import configuration from 'src/configuration';
 import { User } from 'src/models/user.model';
 import { TokenModule } from 'src/token/token.module';
+import { Workspace } from 'src/models/workspace.model';
+import { WorkspaceModule } from 'src/workspace/workspace.module';
 
 @Module({
   imports: [
@@ -26,10 +28,11 @@ import { TokenModule } from 'src/token/token.module';
         database: configService.get('db_name'),
         synchronize: true,
         autoLoadModels: true,
-        models: [User],
+        models: [User, Workspace],
       }),
     }),
     UsersModule,
+    WorkspaceModule,
     TokenModule,
   ],
   controllers: [AppController],
