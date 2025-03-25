@@ -17,10 +17,6 @@ export class Workspace extends Model {
   Workspace_id: number;
   @Column
   name: string;
-  @Column
-  all_size: number;
-  @Column
-  page_count: number;
   @ForeignKey(() => User)
   @Column
   user_id: number;

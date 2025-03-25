@@ -4,8 +4,8 @@ import { User } from 'src/models/user.model';
 import * as argon2 from 'argon2';
 import { LoginUserDto, RegisterUserDto, ResponseLoginUserDto } from './dto';
 import { ErrorLog } from 'src/errors';
-import { TokenService } from 'src/token/token.service';
-import { WorkspaceService } from 'src/workspace/workspace.service';
+import { TokenService } from 'src/modules/token/token.service';
+import { WorkspaceService } from 'src/modules/workspace/workspace.service';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +27,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email: email } });
   }
 
+  async findUserById(User_id: number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { User_id: User_id } });
+  }
+
   async regeisterUser(dto: RegisterUserDto): Promise<ResponseLoginUserDto> {
     const userExistCheck = await this.findUserByEmail(dto.email);
     if (userExistCheck) {
@@ -40,10 +44,7 @@ export class UsersService {
       storage_limit: 2048,
       storage: 0,
     });
-    await this.workspaceService.createWorkspace(
-      { name: 'MyWorkspace', all_size: newUser.storage, page_count: 1 },
-      newUser.User_id,
-    );
+    await this.workspaceService.createWorkspace('MyWorkspace', newUser.User_id);
     const token = await this.tokenService.generateJwtToken(newUser.User_id);
     return { email: dto.email, name: dto.name, token: token };
   }

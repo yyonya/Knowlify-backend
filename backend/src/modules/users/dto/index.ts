@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { IsString } from 'class-validator';
 
 export class RegisterUserDto {
@@ -23,4 +24,9 @@ export class ResponseLoginUserDto {
   name: string;
   @IsString()
   token: string;
+}
+
+export class UserFromTokenDto {
+  @Expose()
+  userId: number;
 }

@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { LoginUserDto, RegisterUserDto, ResponseLoginUserDto } from './dto';
+import { JwtAuthGuard } from 'src/guards/jwt-guard';
 
 @Controller('api/users')
 export class UsersController {
@@ -13,5 +14,11 @@ export class UsersController {
   @Post('login')
   loginUsers(@Body() dto: LoginUserDto): Promise<ResponseLoginUserDto> {
     return this.userService.loginUser(dto);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('test')
+  test(@Req() req) {
+    const userId = req.user.userId;
+    return { userId, success: true };
   }
 }
