@@ -10,6 +10,8 @@ import { TokenModule } from 'src/modules/token/token.module';
 import { Workspace } from 'src/models/workspace.model';
 import { WorkspaceModule } from 'src/modules/workspace/workspace.module';
 import { Pages } from 'src/models/pages.model';
+import { AccountModule } from '../account/account.module';
+import { ManagerModule } from '../manager/manager.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { Pages } from 'src/models/pages.model';
     UsersModule,
     WorkspaceModule,
     TokenModule,
+    AccountModule,
+    ManagerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

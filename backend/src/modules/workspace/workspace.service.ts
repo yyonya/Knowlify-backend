@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Workspace } from 'src/models/workspace.model';
 import { Pages } from 'src/models/pages.model';
-import { CreatePageDto, CreateWorkspaceDto } from './dto';
+import { CreatePageDto, CreateWorkspaceDto } from '../manager/dto';
 import { ErrorLog } from 'src/errors';
 
 @Injectable()
