@@ -9,6 +9,7 @@ import { User } from 'src/models/user.model';
 import { TokenModule } from 'src/modules/token/token.module';
 import { Workspace } from 'src/models/workspace.model';
 import { WorkspaceModule } from 'src/modules/workspace/workspace.module';
+import { Pages } from 'src/models/pages.model';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { WorkspaceModule } from 'src/modules/workspace/workspace.module';
         database: configService.get('db_name'),
         synchronize: true,
         autoLoadModels: true,
-        models: [User, Workspace],
+        models: [User, Workspace, Pages],
       }),
     }),
     UsersModule,

@@ -50,7 +50,14 @@ export class UsersService {
       storage_limit: 2048,
       storage: 0,
     });
-    await this.workspaceService.createWorkspace('MyWorkspace', newUser.User_id);
+    const newWorkspace = await this.workspaceService.createWorkspace({
+      user_id: newUser.User_id,
+    });
+    await this.workspaceService.createPage({
+      parent_page_id: null,
+      depth: 0,
+      workspace_id: newWorkspace.Workspace_id,
+    });
     const token: string = await this.tokenService.generateJwtToken(
       newUser.User_id,
     );
