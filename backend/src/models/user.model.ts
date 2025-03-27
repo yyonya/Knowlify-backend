@@ -24,9 +24,6 @@ export class User extends Model {
   storage_limit: number;
   @Column
   storage: number;
-  @HasOne(() => Workspace, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
+  @HasOne(() => Workspace)
   workspace: Workspace;
 }

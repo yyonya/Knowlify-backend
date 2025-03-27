@@ -18,8 +18,13 @@ export class Workspace extends Model {
   @Column
   name: string;
   @ForeignKey(() => User)
-  @Column
+  @Column({
+    unique: true,
+  })
   user_id: number;
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   user: User;
 }

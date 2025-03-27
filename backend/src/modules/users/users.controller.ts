@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { LoginUserDto, RegisterUserDto, ResponseLoginUserDto } from './dto';
 import { JwtAuthGuard } from 'src/guards/jwt-guard';
@@ -16,9 +16,10 @@ export class UsersController {
     return this.userService.loginUser(dto);
   }
   @UseGuards(JwtAuthGuard)
-  @Post('test')
+  @Delete('destroy')
   test(@Req() req) {
-    const userId = req.user.userId;
-    return { userId, success: true };
+    // eslint-disable-next-line
+    const user_id: number = req.user.user_id;
+    return this.userService.destroyUser(user_id);
   }
 }

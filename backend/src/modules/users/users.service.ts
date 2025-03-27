@@ -70,4 +70,10 @@ export class UsersService {
       token: token,
     };
   }
+
+  async destroyUser(user_id: number): Promise<number> {
+    return this.userRepository.destroy({
+      where: { User_id: user_id },
+    });
+  }
 }
