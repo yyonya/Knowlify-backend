@@ -2,7 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from 'src/models/user.model';
 import * as argon2 from 'argon2';
-import { LoginUserDto, RegisterUserDto, ResponseLoginUserDto } from './dto';
+import {
+  LoginUserDto,
+  RegisterUserDto,
+  RequestPasswordResetDto,
+  ResetPasswordDto,
+  ResponseLoginUserDto,
+} from './dto';
 import { ErrorLog } from 'src/errors';
 import { TokenService } from 'src/modules/token/token.service';
 import { WorkspaceService } from 'src/modules/workspace/workspace.service';
@@ -45,7 +51,9 @@ export class UsersService {
       storage: 0,
     });
     await this.workspaceService.createWorkspace('MyWorkspace', newUser.User_id);
-    const token = await this.tokenService.generateJwtToken(newUser.User_id);
+    const token: string = await this.tokenService.generateJwtToken(
+      newUser.User_id,
+    );
     return { email: dto.email, name: dto.name, token: token };
   }
 
@@ -54,14 +62,14 @@ export class UsersService {
     if (!userExistCheck) {
       throw new BadRequestException(ErrorLog.LOGIN_FAILTURE);
     }
-    const passwordCheck = await this.passwordVerify(
+    const passwordCheck: boolean = await this.passwordVerify(
       userExistCheck.password_hash,
       dto.password,
     );
     if (!passwordCheck) {
       throw new BadRequestException(ErrorLog.LOGIN_FAILTURE);
     }
-    const token = await this.tokenService.generateJwtToken(
+    const token: string = await this.tokenService.generateJwtToken(
       userExistCheck.User_id,
     );
     return {
@@ -75,5 +83,27 @@ export class UsersService {
     return this.userRepository.destroy({
       where: { User_id: user_id },
     });
+  }
+
+  async sendPasswordResetLink(dto: RequestPasswordResetDto): Promise<string> {
+    const userExistCheck = await this.findUserByEmail(dto.email);
+    if (!userExistCheck) {
+      throw new BadRequestException(ErrorLog.USER_NOT_EXIST);
+    }
+    const resetToken: string = await this.tokenService.generateJwtToken(
+      userExistCheck.User_id,
+    );
+    const resetUrl: string = `https://myapp/reset-password?token=${resetToken}`;
+    return resetUrl;
+  }
+
+  async resetPassword(dto: ResetPasswordDto, user_id: number) {
+    dto.newPassword = await this.passwordHash(dto.newPassword);
+    return await this.userRepository.update(
+      { password_hash: dto.newPassword },
+      {
+        where: { User_id: user_id },
+      },
+    );
   }
 }

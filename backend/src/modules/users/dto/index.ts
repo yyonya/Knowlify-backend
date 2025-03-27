@@ -1,8 +1,8 @@
 import { Expose } from 'class-transformer';
-import { IsString } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
 export class RegisterUserDto {
-  @IsString()
+  @IsEmail()
   email: string;
   @IsString()
   name: string;
@@ -11,19 +11,29 @@ export class RegisterUserDto {
 }
 
 export class LoginUserDto {
-  @IsString()
+  @IsEmail()
   email: string;
   @IsString()
   password: string;
 }
 
 export class ResponseLoginUserDto {
-  @IsString()
+  @IsEmail()
   email: string;
   @IsString()
   name: string;
   @IsString()
   token: string;
+}
+
+export class RequestPasswordResetDto {
+  @IsEmail()
+  email: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  newPassword: string;
 }
 
 export class UserFromTokenDto {
