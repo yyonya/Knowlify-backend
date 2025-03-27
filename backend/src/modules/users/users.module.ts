@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -8,7 +8,11 @@ import { WorkspaceModule } from 'src/modules/workspace/workspace.module';
 import { JwtStrategy } from 'src/strategy';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User]), TokenModule, WorkspaceModule],
+  imports: [
+    SequelizeModule.forFeature([User]),
+    TokenModule,
+    forwardRef(() => WorkspaceModule),
+  ],
   controllers: [UsersController],
   providers: [UsersService, JwtStrategy],
   exports: [UsersService],

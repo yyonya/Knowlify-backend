@@ -14,16 +14,22 @@ export class User extends Model {
   @AutoIncrement
   @Column
   User_id: number;
+
   @Column
   email: string;
+
   @Column
   name: string;
+
   @Column
   password_hash: string;
+
   @Column
   storage_limit: number;
+
   @Column
   storage: number;
+
   @HasOne(() => Workspace)
   workspace: Workspace;
 }

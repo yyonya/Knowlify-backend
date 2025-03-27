@@ -11,6 +11,7 @@ export class CreatePageDto {
   parent_page_id: number | null;
   @IsNumber()
   depth: number;
+  @IsOptional()
   @IsNumber()
-  workspace_id: number;
+  workspace_id?: number | null;
 }

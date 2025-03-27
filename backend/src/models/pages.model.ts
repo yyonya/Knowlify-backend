@@ -78,9 +78,7 @@ export class Pages extends Model {
   deletedAt: Date | null;
 
   @ForeignKey(() => Workspace)
-  @Column({
-    unique: true,
-  })
+  @Column
   workspace_id: number;
 
   @BelongsTo(() => Workspace, {

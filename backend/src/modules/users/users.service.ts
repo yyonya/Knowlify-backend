@@ -53,6 +53,11 @@ export class UsersService {
     const newWorkspace = await this.workspaceService.createWorkspace({
       user_id: newUser.User_id,
     });
+    // await newWorkspace.$create('page', {
+    //   title: 'NewPage',
+    //   parent_page_id: null,
+    //   depth: 0,
+    // });
     await this.workspaceService.createPage({
       parent_page_id: null,
       depth: 0,
