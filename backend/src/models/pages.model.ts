@@ -1,6 +1,7 @@
 import {
   AutoIncrement,
   BelongsTo,
+  BelongsToMany,
   Column,
   DataType,
   ForeignKey,
@@ -9,6 +10,8 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { Workspace } from './workspace.model';
+import { User } from './user.model';
+import { WorkspaceMembers } from './workspace-members.model';
 
 @Table
 export class Pages extends Model {
@@ -86,4 +89,7 @@ export class Pages extends Model {
     onUpdate: 'CASCADE',
   })
   workspace: Workspace;
+
+  @BelongsToMany(() => User, () => WorkspaceMembers)
+  users: User[];
 }

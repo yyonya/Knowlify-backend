@@ -2,8 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Workspace } from 'src/models/workspace.model';
 import { Pages } from 'src/models/pages.model';
-import { CreatePageDto, CreateWorkspaceDto } from '../manager/dto';
+import {
+  CreatePageDto,
+  CreateWorkspaceDto,
+  CreateWorkspaceMemberDto,
+} from '../manager/dto';
 import { ErrorLog } from 'src/errors';
+import { WorkspaceMembers } from 'src/models/workspace-members.model';
 
 @Injectable()
 export class WorkspaceService {
@@ -12,6 +17,8 @@ export class WorkspaceService {
     private readonly workspaceRepository: typeof Workspace,
     @InjectModel(Pages)
     private readonly pageRepository: typeof Pages,
+    @InjectModel(WorkspaceMembers)
+    private readonly workspaceMembersRepository: typeof WorkspaceMembers,
   ) {}
 
   async findWorkspaceByUserId(user_id: number): Promise<Workspace | null> {
@@ -24,6 +31,7 @@ export class WorkspaceService {
       user_id: dto.user_id,
     });
   }
+
   async createPage(dto: CreatePageDto, user_id?: number): Promise<Pages> {
     let workspace_id = dto.workspace_id;
     if (!workspace_id && user_id === undefined) {
@@ -41,6 +49,16 @@ export class WorkspaceService {
       parent_page_id: dto.parent_page_id, // TODO CHECK LOGIC
       depth: dto.depth, // TODO CHECK LOGIC
       workspace_id: workspace_id,
+    });
+  }
+
+  async createWorkspaceMember(
+    dto: CreateWorkspaceMemberDto,
+  ): Promise<WorkspaceMembers> {
+    return this.workspaceMembersRepository.create({
+      user_id: dto.user_id,
+      page_id: dto.page_id,
+      role: dto.role,
     });
   }
 }

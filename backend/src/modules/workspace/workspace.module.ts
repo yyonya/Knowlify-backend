@@ -4,9 +4,10 @@ import { WorkspaceService } from './workspace.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Workspace } from 'src/models/workspace.model';
 import { Pages } from 'src/models/pages.model';
+import { WorkspaceMembers } from 'src/models/workspace-members.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Workspace, Pages])],
+  imports: [SequelizeModule.forFeature([Workspace, Pages, WorkspaceMembers])],
   controllers: [WorkspaceController],
   providers: [WorkspaceService],
   exports: [WorkspaceService],

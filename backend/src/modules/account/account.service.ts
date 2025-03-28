@@ -32,10 +32,20 @@ export class AccountService {
     //   parent_page_id: null,
     //   depth: 0,
     // });
-    await this.workspaceService.createPage({
+    const newPage = await this.workspaceService.createPage({
       parent_page_id: null,
       depth: 0,
       workspace_id: newWorkspace.Workspace_id,
+    });
+    // await newUser.$add('pages', newPage, {
+    //   through: {
+    //     role: 'owner',
+    //   },
+    // });
+    await this.workspaceService.createWorkspaceMember({
+      user_id: newUser.User_id,
+      page_id: newPage.Page_id,
+      role: 'owner',
     });
     const token: string = await this.userService.generateToken(newUser);
     return { email: dto.email, name: dto.name, token: token };

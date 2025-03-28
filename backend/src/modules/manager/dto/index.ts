@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateWorkspaceDto {
   @IsNumber()
@@ -14,4 +14,13 @@ export class CreatePageDto {
   @IsOptional()
   @IsNumber()
   workspace_id?: number | null;
+}
+
+export class CreateWorkspaceMemberDto {
+  @IsNumber()
+  user_id: number;
+  @IsNumber()
+  page_id: number;
+  @IsString()
+  role: string;
 }

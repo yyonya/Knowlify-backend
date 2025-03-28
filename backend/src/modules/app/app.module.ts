@@ -12,6 +12,7 @@ import { WorkspaceModule } from 'src/modules/workspace/workspace.module';
 import { Pages } from 'src/models/pages.model';
 import { AccountModule } from '../account/account.module';
 import { ManagerModule } from '../manager/manager.module';
+import { WorkspaceMembers } from 'src/models/workspace-members.model';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { ManagerModule } from '../manager/manager.module';
         database: configService.get('db_name'),
         synchronize: true,
         autoLoadModels: true,
-        models: [User, Workspace, Pages],
+        models: [User, Workspace, Pages, WorkspaceMembers],
       }),
     }),
     UsersModule,
