@@ -14,6 +14,7 @@ import { Workspace } from './workspace.model';
 import { User } from './user.model';
 import { WorkspaceMembers } from './workspace-members.model';
 import { Invitations } from './invitations.model';
+import { Blocks } from './blocks.model';
 
 @Table
 export class Pages extends Model {
@@ -97,4 +98,7 @@ export class Pages extends Model {
 
   @HasMany(() => Invitations)
   invitations: Invitations[];
+
+  @HasMany(() => Blocks)
+  blocks: Blocks[];
 }

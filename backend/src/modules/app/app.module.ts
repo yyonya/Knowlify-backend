@@ -14,6 +14,7 @@ import { AccountModule } from '../account/account.module';
 import { ManagerModule } from '../manager/manager.module';
 import { WorkspaceMembers } from 'src/models/workspace-members.model';
 import { Invitations } from 'src/models/invitations.model';
+import { Blocks } from 'src/models/blocks.model';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { Invitations } from 'src/models/invitations.model';
         database: configService.get('db_name'),
         synchronize: true,
         autoLoadModels: true,
-        models: [User, Workspace, Pages, WorkspaceMembers, Invitations],
+        models: [User, Workspace, Pages, WorkspaceMembers, Invitations, Blocks],
       }),
     }),
     UsersModule,
