@@ -48,7 +48,33 @@ export class AccountService {
       role: 'owner',
     });
     const token: string = await this.userService.generateToken(newUser);
-    return { email: dto.email, name: dto.name, token: token };
+    return {
+      email: dto.email,
+      name: dto.name,
+      token: token,
+      workspace_name: newWorkspace.name,
+      pages: [
+        {
+          page_id: newPage.Page_id,
+          title: newPage.title,
+          description: newPage.description,
+          parent_page_id: newPage.parent_page_id,
+          depth: newPage.depth,
+          picture_url: newPage.picture_url,
+          avatar_url: newPage.avatar_url,
+          type: newPage.type,
+          is_public: newPage.is_public,
+          category: newPage.category,
+          subscription_type: newPage.subscription_type,
+          created_at: new Date(
+            newPage.createdAt as unknown as string,
+          ).toISOString(),
+          updated_at: new Date(
+            newPage.updatedAt as unknown as string,
+          ).toISOString(),
+        },
+      ],
+    };
   }
 
   async loginUser(dto: LoginUserDto): Promise<ResponseLoginUserDto> {
@@ -63,11 +89,36 @@ export class AccountService {
     if (!passwordCheck) {
       throw new BadRequestException(ErrorLog.LOGIN_FAILTURE);
     }
+    const userWorkspace = await this.workspaceService.findWorkspaceByUserId(
+      userExistCheck.User_id,
+    );
+    if (!userWorkspace) {
+      throw new BadRequestException(ErrorLog.WORKSPACE_NOT_EXIST);
+    }
+    const userPages = await this.workspaceService.getUserPagesByUserId(
+      userExistCheck.User_id,
+    );
     const token: string = await this.userService.generateToken(userExistCheck);
     return {
       email: userExistCheck.email,
       name: userExistCheck.name,
       token: token,
+      workspace_name: userWorkspace.name,
+      pages: userPages.map((page) => ({
+        page_id: page.Page_id,
+        title: page.title,
+        description: page.description,
+        parent_page_id: page.parent_page_id,
+        depth: page.depth,
+        picture_url: page.picture_url,
+        avatar_url: page.avatar_url,
+        type: page.type,
+        is_public: page.is_public,
+        category: page.category,
+        subscription_type: page.subscription_type,
+        created_at: new Date(page.createdAt as unknown as string).toISOString(),
+        updated_at: new Date(page.updatedAt as unknown as string).toISOString(),
+      })),
     };
   }
 

@@ -21,6 +21,9 @@ export class Workspace extends Model {
   @Column
   name: string;
 
+  @Column
+  user_limit: number;
+
   @ForeignKey(() => User)
   @Column({
     unique: true,

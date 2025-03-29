@@ -9,6 +9,7 @@ import {
 } from '../manager/dto';
 import { ErrorLog } from 'src/errors';
 import { WorkspaceMembers } from 'src/models/workspace-members.model';
+import { User } from 'src/models/user.model';
 
 @Injectable()
 export class WorkspaceService {
@@ -25,9 +26,23 @@ export class WorkspaceService {
     return this.workspaceRepository.findOne({ where: { user_id: user_id } });
   }
 
+  async getUserPagesByUserId(user_id: number): Promise<Pages[]> {
+    return this.pageRepository.findAll({
+      include: [
+        {
+          model: User, // Модель для связи
+          as: 'users', // Псевдоним ассоциации
+          where: { User_id: user_id }, // Условие фильтрации
+          through: { attributes: [] }, // Настройки промежуточной таблицы
+        },
+      ],
+    });
+  }
+
   async createWorkspace(dto: CreateWorkspaceDto): Promise<Workspace> {
     return this.workspaceRepository.create({
       name: 'MyWorkspace',
+      user_limit: 5,
       user_id: dto.user_id,
     });
   }
@@ -38,18 +53,24 @@ export class WorkspaceService {
       throw new BadRequestException(ErrorLog.WORKSPACE_OR_USER_REQUIRED);
     }
     if (!workspace_id) {
-      const workspace = await this.findWorkspaceByUserId(user_id!);
+      const workspace = await this.findWorkspaceByUserId(user_id!); // TODO CHECK LOGIC ROLE ?
       if (!workspace) {
         throw new BadRequestException(ErrorLog.WORKSPACE_NOT_EXIST);
       }
       workspace_id = workspace.Workspace_id;
     }
-    return this.pageRepository.create({
+    const newPage = await this.pageRepository.create({
       title: 'NewPage',
       parent_page_id: dto.parent_page_id, // TODO CHECK LOGIC
       depth: dto.depth, // TODO CHECK LOGIC
       workspace_id: workspace_id,
     });
+    await this.createWorkspaceMember({
+      user_id: user_id!,
+      page_id: newPage.Page_id,
+      role: 'owner',
+    });
+    return newPage;
   }
 
   async createWorkspaceMember(
