@@ -13,6 +13,7 @@ import { Pages } from 'src/models/pages.model';
 import { AccountModule } from '../account/account.module';
 import { ManagerModule } from '../manager/manager.module';
 import { WorkspaceMembers } from 'src/models/workspace-members.model';
+import { Invitations } from 'src/models/invitations.model';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { WorkspaceMembers } from 'src/models/workspace-members.model';
         database: configService.get('db_name'),
         synchronize: true,
         autoLoadModels: true,
-        models: [User, Workspace, Pages, WorkspaceMembers],
+        models: [User, Workspace, Pages, WorkspaceMembers, Invitations],
       }),
     }),
     UsersModule,

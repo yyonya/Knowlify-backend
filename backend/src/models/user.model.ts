@@ -2,6 +2,7 @@ import {
   AutoIncrement,
   BelongsToMany,
   Column,
+  HasMany,
   HasOne,
   Model,
   PrimaryKey,
@@ -10,6 +11,7 @@ import {
 import { Workspace } from './workspace.model';
 import { Pages } from './pages.model';
 import { WorkspaceMembers } from './workspace-members.model';
+import { Invitations } from './invitations.model';
 
 @Table
 export class User extends Model {
@@ -38,4 +40,7 @@ export class User extends Model {
 
   @BelongsToMany(() => Pages, () => WorkspaceMembers)
   pages: Pages[];
+
+  @HasMany(() => Invitations, 'invited_by')
+  sentInvitations: Invitations[];
 }

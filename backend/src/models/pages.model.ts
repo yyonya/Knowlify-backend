@@ -5,6 +5,7 @@ import {
   Column,
   DataType,
   ForeignKey,
+  HasMany,
   Model,
   PrimaryKey,
   Table,
@@ -12,6 +13,7 @@ import {
 import { Workspace } from './workspace.model';
 import { User } from './user.model';
 import { WorkspaceMembers } from './workspace-members.model';
+import { Invitations } from './invitations.model';
 
 @Table
 export class Pages extends Model {
@@ -92,4 +94,7 @@ export class Pages extends Model {
 
   @BelongsToMany(() => User, () => WorkspaceMembers)
   users: User[];
+
+  @HasMany(() => Invitations)
+  invitations: Invitations[];
 }
