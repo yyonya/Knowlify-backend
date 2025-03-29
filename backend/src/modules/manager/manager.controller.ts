@@ -1,17 +1,26 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { WorkspaceService } from '../workspace/workspace.service';
 import { JwtAuthGuard } from 'src/guards/jwt-guard';
-import { CreatePageDto } from './dto';
+import { CreatePageDto, SaveTransactionsDto } from './dto';
+import { ManagerService } from './manager.service';
 
 @Controller('api/manager')
 export class ManagerController {
-  constructor(private readonly workspaceService: WorkspaceService) {}
+  constructor(private readonly managerService: ManagerService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('create-page')
   async createPages(@Req() req, @Body() dto: CreatePageDto) {
     // eslint-disable-next-line
     const user_id: number = req.user.user_id;
-    return this.workspaceService.createPage(dto, user_id);
+    return this.managerService.CreateNewPage(dto, user_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('save-transactions')
+  async saveTransactions(@Req() req, @Body() dto: SaveTransactionsDto) {
+    // eslint-disable-next-line
+    const user_id: number = req.user.user_id;
+
+    return this.managerService.saveTransactions(dto, user_id);
   }
 }

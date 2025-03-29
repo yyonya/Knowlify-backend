@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Workspace } from 'src/models/workspace.model';
 import { Pages } from 'src/models/pages.model';
 import {
+  CreateBlockDto,
   CreatePageDto,
   CreateWorkspaceDto,
   CreateWorkspaceMemberDto,
@@ -10,6 +11,7 @@ import {
 import { ErrorLog } from 'src/errors';
 import { WorkspaceMembers } from 'src/models/workspace-members.model';
 import { User } from 'src/models/user.model';
+import { Blocks } from 'src/models/blocks.model';
 
 @Injectable()
 export class WorkspaceService {
@@ -20,20 +22,36 @@ export class WorkspaceService {
     private readonly pageRepository: typeof Pages,
     @InjectModel(WorkspaceMembers)
     private readonly workspaceMembersRepository: typeof WorkspaceMembers,
+    @InjectModel(Blocks)
+    private readonly blocksRepository: typeof Blocks,
   ) {}
 
   async findWorkspaceByUserId(user_id: number): Promise<Workspace | null> {
     return this.workspaceRepository.findOne({ where: { user_id: user_id } });
   }
 
+  async checkRightToEditPage(user_id: number, page_id): Promise<boolean> {
+    const membership = await this.workspaceMembersRepository.findOne({
+      where: {
+        user_id,
+        page_id,
+      },
+      attributes: ['role'],
+    });
+    if (!membership) {
+      return false;
+    }
+    return ['owner', 'editor'].includes(membership.role.toLowerCase());
+  }
+
   async getUserPagesByUserId(user_id: number): Promise<Pages[]> {
     return this.pageRepository.findAll({
       include: [
         {
-          model: User, // Модель для связи
-          as: 'users', // Псевдоним ассоциации
-          where: { User_id: user_id }, // Условие фильтрации
-          through: { attributes: [] }, // Настройки промежуточной таблицы
+          model: User,
+          as: 'users',
+          where: { User_id: user_id },
+          through: { attributes: [] },
         },
       ],
     });
@@ -48,6 +66,7 @@ export class WorkspaceService {
   }
 
   async createPage(dto: CreatePageDto, user_id?: number): Promise<Pages> {
+    // TODO Refactor to manager
     let workspace_id = dto.workspace_id;
     if (!workspace_id && user_id === undefined) {
       throw new BadRequestException(ErrorLog.WORKSPACE_OR_USER_REQUIRED);
@@ -80,6 +99,14 @@ export class WorkspaceService {
       user_id: dto.user_id,
       page_id: dto.page_id,
       role: dto.role,
+    });
+  }
+
+  async createBlock(dto: CreateBlockDto): Promise<Blocks> {
+    return this.blocksRepository.create({
+      type: dto.type,
+      position: dto.position,
+      page_id: dto.page_id,
     });
   }
 }
