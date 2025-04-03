@@ -10,6 +10,7 @@ export class ManagerController {
   @UseGuards(JwtAuthGuard)
   @Post('create-page')
   async createPages(@Req() req, @Body() dto: CreatePageDto) {
+    // TODO Response
     // eslint-disable-next-line
     const user_id: number = req.user.user_id;
     return this.managerService.CreateNewPage(dto, user_id);
@@ -18,6 +19,7 @@ export class ManagerController {
   @UseGuards(JwtAuthGuard)
   @Post('save-transactions')
   async saveTransactions(@Req() req, @Body() dto: SaveTransactionsDto) {
+    // TODO Response
     // eslint-disable-next-line
     const user_id: number = req.user.user_id;
 

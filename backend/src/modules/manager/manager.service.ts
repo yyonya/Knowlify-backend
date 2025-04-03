@@ -12,8 +12,26 @@ import { ErrorLog } from 'src/errors';
 export class ManagerService {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
-  async CreateNewPage(dto: CreatePageDto, user_id?: number) {
-    return this.workspaceService.createPage(dto, user_id);
+  async CreateNewPage(dto: CreatePageDto, user_id: number) {
+    let workspace_id = dto.workspace_id;
+    if (!workspace_id && user_id === undefined) {
+      throw new BadRequestException(ErrorLog.WORKSPACE_OR_USER_REQUIRED);
+    }
+    if (!workspace_id) {
+      const workspace =
+        await this.workspaceService.findWorkspaceByUserId(user_id); // TODO CHECK LOGIC ROLE ?
+      if (!workspace) {
+        throw new BadRequestException(ErrorLog.WORKSPACE_NOT_EXIST);
+      }
+      workspace_id = workspace.Workspace_id;
+    }
+    const newPage = await this.workspaceService.createPage(dto, workspace_id);
+    await this.workspaceService.createWorkspaceMember({
+      user_id: user_id,
+      page_id: newPage.Page_id,
+      role: 'owner',
+    });
+    return newPage;
   }
 
   async saveTransactions(dto: SaveTransactionsDto, user_id: number) {

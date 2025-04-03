@@ -27,21 +27,13 @@ export class AccountService {
     const newWorkspace = await this.workspaceService.createWorkspace({
       user_id: newUser.User_id,
     });
-    // await newWorkspace.$create('page', {
-    //   title: 'NewPage',
-    //   parent_page_id: null,
-    //   depth: 0,
-    // });
-    const newPage = await this.workspaceService.createPage({
-      parent_page_id: null,
-      depth: 0,
-      workspace_id: newWorkspace.Workspace_id,
-    });
-    // await newUser.$add('pages', newPage, {
-    //   through: {
-    //     role: 'owner',
-    //   },
-    // });
+    const newPage = await this.workspaceService.createPage(
+      {
+        parent_page_id: null,
+        depth: 0,
+      },
+      newWorkspace.Workspace_id,
+    );
     await this.workspaceService.createWorkspaceMember({
       user_id: newUser.User_id,
       page_id: newPage.Page_id,

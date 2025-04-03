@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Workspace } from 'src/models/workspace.model';
 import { Pages } from 'src/models/pages.model';
@@ -8,7 +8,6 @@ import {
   CreateWorkspaceDto,
   CreateWorkspaceMemberDto,
 } from '../manager/dto';
-import { ErrorLog } from 'src/errors';
 import { WorkspaceMembers } from 'src/models/workspace-members.model';
 import { User } from 'src/models/user.model';
 import { Blocks } from 'src/models/blocks.model';
@@ -65,31 +64,13 @@ export class WorkspaceService {
     });
   }
 
-  async createPage(dto: CreatePageDto, user_id?: number): Promise<Pages> {
-    // TODO Refactor to manager
-    let workspace_id = dto.workspace_id;
-    if (!workspace_id && user_id === undefined) {
-      throw new BadRequestException(ErrorLog.WORKSPACE_OR_USER_REQUIRED);
-    }
-    if (!workspace_id) {
-      const workspace = await this.findWorkspaceByUserId(user_id!); // TODO CHECK LOGIC ROLE ?
-      if (!workspace) {
-        throw new BadRequestException(ErrorLog.WORKSPACE_NOT_EXIST);
-      }
-      workspace_id = workspace.Workspace_id;
-    }
-    const newPage = await this.pageRepository.create({
+  async createPage(dto: CreatePageDto, workspace_id: number): Promise<Pages> {
+    return this.pageRepository.create({
       title: 'NewPage',
       parent_page_id: dto.parent_page_id, // TODO CHECK LOGIC
       depth: dto.depth, // TODO CHECK LOGIC
       workspace_id: workspace_id,
     });
-    await this.createWorkspaceMember({
-      user_id: user_id!,
-      page_id: newPage.Page_id,
-      role: 'owner',
-    });
-    return newPage;
   }
 
   async createWorkspaceMember(
