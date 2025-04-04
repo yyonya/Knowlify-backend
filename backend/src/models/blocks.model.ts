@@ -27,7 +27,13 @@ export class Blocks extends Model {
   content: Record<string, any>;
 
   @Column
-  position: number;
+  col_position: number;
+
+  @Column
+  row_position: number;
+
+  @Column
+  width: number;
 
   @ForeignKey(() => Pages)
   @Column

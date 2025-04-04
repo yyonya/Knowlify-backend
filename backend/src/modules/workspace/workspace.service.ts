@@ -86,7 +86,9 @@ export class WorkspaceService {
   async createBlock(dto: CreateBlockDto): Promise<Blocks> {
     return this.blocksRepository.create({
       type: dto.type,
-      position: dto.position,
+      col_position: dto.col_position,
+      row_position: dto.row_position,
+      width: dto.width,
       page_id: dto.page_id,
     });
   }

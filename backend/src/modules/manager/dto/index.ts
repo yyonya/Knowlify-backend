@@ -30,7 +30,11 @@ export class CreateBlockDto {
   @IsNumber()
   type: string;
   @IsNumber()
-  position: number;
+  col_position: number;
+  @IsNumber()
+  row_position: number;
+  @IsNumber()
+  width: number;
   @IsNumber()
   page_id: number;
 }
