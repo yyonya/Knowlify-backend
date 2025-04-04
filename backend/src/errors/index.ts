@@ -7,4 +7,5 @@ export const ErrorLog = {
   JWT_FAILTURE: 'Wrong user token.',
   COMMAND_FAILTURE: 'Invalid command',
   RIGHTS_FAILTURE: 'No rights to edit',
+  WS_CONNECTION: 'User with this id already connect',
 };

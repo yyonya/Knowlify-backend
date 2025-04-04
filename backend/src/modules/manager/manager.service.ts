@@ -1,11 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { WorkspaceService } from '../workspace/workspace.service';
-import {
-  CreateOperationArgs,
-  CreatePageDto,
-  SaveTransactionsDto,
-  TransactionOperationDto,
-} from './dto';
+import { CreatePageDto } from './dto';
 import { ErrorLog } from 'src/errors';
 
 @Injectable()
@@ -34,45 +29,45 @@ export class ManagerService {
     return newPage;
   }
 
-  async saveTransactions(dto: SaveTransactionsDto, user_id: number) {
-    const page_id = dto.page_id;
-    const right = await this.workspaceService.checkRightToEditPage(
-      user_id,
-      page_id,
-    );
-    if (!right) {
-      throw new BadRequestException(ErrorLog.RIGHTS_FAILTURE);
-    }
-    const transactions = dto.transactions;
-    const results: number[] = [];
-    for (const transaction of transactions) {
-      for (const operation of transaction.operations) {
-        // TODO ошибки обработка
-        const result = await this.processOperation(operation, page_id);
-        results.push(result);
-      }
-    }
-    return results;
-  }
+  // async saveTransactions(dto: SaveTransactionsDto, user_id: number) {
+  //   const page_id = dto.page_id;
+  //   const right = await this.workspaceService.checkRightToEditPage(
+  //     user_id,
+  //     page_id,
+  //   );
+  //   if (!right) {
+  //     throw new BadRequestException(ErrorLog.RIGHTS_FAILTURE);
+  //   }
+  //   const transactions = dto.transactions;
+  //   const results: number[] = [];
+  //   for (const transaction of transactions) {
+  //     for (const operation of transaction.operations) {
+  //       // TODO ошибки обработка
+  //       const result = await this.processOperation(operation, page_id);
+  //       results.push(result);
+  //     }
+  //   }
+  //   return results;
+  // }
 
-  async processOperation(operation: TransactionOperationDto, page_id: number) {
-    switch (operation.command) {
-      case 'create':
-        return this.createBlock(operation.args as CreateOperationArgs, page_id);
-      default:
-        throw new BadRequestException(ErrorLog.COMMAND_FAILTURE);
-    }
-  }
+  // async processOperation(operation: TransactionOperationDto, page_id: number) {
+  //   switch (operation.command) {
+  //     case 'create':
+  //       return this.createBlock(operation.args as CreateOperationArgs, page_id);
+  //     default:
+  //       throw new BadRequestException(ErrorLog.COMMAND_FAILTURE);
+  //   }
+  // }
 
-  async createBlock(
-    args: CreateOperationArgs,
-    page_id: number,
-  ): Promise<number> {
-    const newBlock = await this.workspaceService.createBlock({
-      position: args.position,
-      type: args.type,
-      page_id: page_id,
-    });
-    return newBlock.Block_id;
-  }
+  // async createBlock(
+  //   args: CreateOperationArgs,
+  //   page_id: number,
+  // ): Promise<number> {
+  //   const newBlock = await this.workspaceService.createBlock({
+  //     position: args.position,
+  //     type: args.type,
+  //     page_id: page_id,
+  //   });
+  //   return newBlock.Block_id;
+  // }
 }

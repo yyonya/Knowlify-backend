@@ -15,6 +15,7 @@ import { ManagerModule } from '../manager/manager.module';
 import { WorkspaceMembers } from 'src/models/workspace-members.model';
 import { Invitations } from 'src/models/invitations.model';
 import { Blocks } from 'src/models/blocks.model';
+import { EventsModule } from '../events/events.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { Blocks } from 'src/models/blocks.model';
     TokenModule,
     AccountModule,
     ManagerModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
