@@ -48,25 +48,17 @@ export class ManagerService {
     for (const transaction of transactions) {
       for (const operation of transaction.operations) {
         // TODO ошибки обработка
-        const result = await this.processOperation(user_id, operation, page_id);
+        const result = await this.processOperation(operation, page_id);
         results.push(result);
       }
     }
     return results;
   }
 
-  async processOperation(
-    user_id: number,
-    operation: TransactionOperationDto,
-    page_id: number,
-  ) {
+  async processOperation(operation: TransactionOperationDto, page_id: number) {
     switch (operation.command) {
-      //   case 'update':
-      //     return this.updateBlock(user_id, operation.block_id, operation.args);
       case 'create':
         return this.createBlock(operation.args as CreateOperationArgs, page_id);
-      //   case 'delete':
-      //     return this.deleteBlock(user_id, operation.block_id);
       default:
         throw new BadRequestException(ErrorLog.COMMAND_FAILTURE);
     }
@@ -76,14 +68,6 @@ export class ManagerService {
     args: CreateOperationArgs,
     page_id: number,
   ): Promise<number> {
-    if (!['text', 'bulleted list'].includes(args.type)) {
-      throw new BadRequestException(ErrorLog.BlOCK_FAILTURE);
-    }
-
-    if (args.position < 0) {
-      // FIX LOGIC
-      throw new BadRequestException(ErrorLog.BlOCK_FAILTURE);
-    }
     const newBlock = await this.workspaceService.createBlock({
       position: args.position,
       type: args.type,

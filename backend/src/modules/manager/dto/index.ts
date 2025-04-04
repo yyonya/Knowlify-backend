@@ -1,9 +1,11 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -92,8 +94,10 @@ class UpdateOperationArgs {
 
 export class CreateOperationArgs {
   @IsString()
+  @IsIn(['text', 'bulleted list'])
   type: string;
   @IsNumber()
+  @Min(1)
   position: number;
 }
 

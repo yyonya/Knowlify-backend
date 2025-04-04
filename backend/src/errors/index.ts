@@ -6,7 +6,5 @@ export const ErrorLog = {
   LOGIN_FAILTURE: 'Wrong login parameters.',
   JWT_FAILTURE: 'Wrong user token.',
   COMMAND_FAILTURE: 'Invalid command',
-  BlOCK_FAILTURE: 'Invalid block type',
-  POSITION_FAILTURE: 'Invalid position',
   RIGHTS_FAILTURE: 'No rights to edit',
 };
