@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { TokenService } from '../token/token.service';
 import { ErrorLog } from 'src/errors';
 import { SaveTransactionsDto, TransactionDto } from './dto';
+import { WorkspaceService } from '../workspace/workspace.service';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -20,7 +21,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(
+    private readonly tokenService: TokenService,
+    private readonly workspaceService: WorkspaceService,
+  ) {}
 
   // Хранилище клиентов
   private clients = new Map<number, Socket>();
@@ -29,33 +33,56 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   afterInit(server: Server) {
     server.use((client: Socket, next) => {
-      console.log(`Start`);
-      try {
-        const authHeader = client.handshake.headers.authorization;
-        const [type, token] = authHeader?.split(' ') ?? [];
+      void (async () => {
+        // IIFE + void для игнорирования Promise
+        try {
+          const authHeader = client.handshake.headers.authorization;
+          const { page_id } = client.handshake.query;
+          const [type, token] = authHeader?.split(' ') ?? [];
 
-        if (type !== 'Bearer' || !token) {
-          throw new WsException(ErrorLog.JWT_FAILTURE);
+          if (
+            type !== 'Bearer' ||
+            !token ||
+            !page_id ||
+            Array.isArray(page_id)
+          ) {
+            throw new WsException(ErrorLog.WS_PARAMS);
+          }
+
+          const roomId = Number(page_id);
+          if (isNaN(roomId)) {
+            throw new WsException(ErrorLog.WS_PARAMS);
+          }
+
+          const payload = this.tokenService.verifyJwtToken(token);
+          const right = await this.workspaceService.checkRightConnectToPage(
+            payload.user_id,
+            roomId,
+          );
+
+          if (!right) {
+            throw new WsException(ErrorLog.RIGHTS_FAILTURE);
+          }
+
+          if (this.clients.has(payload.user_id)) {
+            throw new WsException(ErrorLog.WS_CONNECTION);
+          }
+
+          this.clients.set(payload.user_id, client);
+          client.data = { user_id: payload.user_id };
+
+          await client.join(roomId.toString());
+          console.log(`Client ${payload.user_id} connected. To room ${roomId}`);
+
+          next(); // Вызов next() внутри асинхронного контекста
+        } catch (error) {
+          next(
+            error instanceof WsException
+              ? error
+              : new WsException(ErrorLog.JWT_FAILTURE),
+          );
         }
-        //!!!
-        const payload = this.tokenService.verifyJwtToken(token);
-
-        if (this.clients.has(payload.user_id)) {
-          throw new WsException(ErrorLog.WS_CONNECTION);
-        }
-
-        this.clients.set(payload.user_id, client);
-        client.data = { user_id: payload.user_id };
-        console.log(`Client connected: ${payload.user_id}`);
-
-        next();
-      } catch (error) {
-        if (error instanceof WsException) {
-          next(error);
-        } else {
-          next(new WsException(ErrorLog.JWT_FAILTURE));
-        }
-      }
+      })(); // Самовызывающаяся асинхронная функция
     });
   }
 
@@ -80,16 +107,27 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
   // Добавление транзакции
   @SubscribeMessage('add-transaction')
   handleTransaction(client: Socket, payload: SaveTransactionsDto) {
-    const { page_id, transactions } = payload;
+    const { transactions } = payload;
 
-    if (!this.transactions.has(page_id)) {
-      this.transactions.set(page_id, []);
+    const userRooms = Array.from(client.rooms).filter(
+      (room) => room !== client.id,
+    );
+
+    if (userRooms.length !== 1) {
+      throw new WsException(ErrorLog.WS_ROOMS);
     }
-    const pageTransactions = this.transactions.get(page_id);
+
+    const [userRoom] = userRooms;
+    const usersRoom = Number(userRoom);
+
+    if (!this.transactions.has(usersRoom)) {
+      this.transactions.set(usersRoom, []);
+    }
+    const pageTransactions = this.transactions.get(usersRoom);
     pageTransactions?.push(...transactions); //?
     console.log(pageTransactions);
 
-    this.server.to(page_id.toString()).emit('transaction-added', {
+    this.server.to(userRoom).emit('transaction-added', {
       count: pageTransactions?.length,
     });
 

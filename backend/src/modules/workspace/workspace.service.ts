@@ -29,7 +29,10 @@ export class WorkspaceService {
     return this.workspaceRepository.findOne({ where: { user_id: user_id } });
   }
 
-  async checkRightToEditPage(user_id: number, page_id): Promise<boolean> {
+  async checkRightConnectToPage(
+    user_id: number,
+    page_id: number,
+  ): Promise<boolean> {
     const membership = await this.workspaceMembersRepository.findOne({
       where: {
         user_id,
@@ -40,7 +43,9 @@ export class WorkspaceService {
     if (!membership) {
       return false;
     }
-    return ['owner', 'editor'].includes(membership.role.toLowerCase());
+    return ['owner', 'editor', 'comment'].includes(
+      membership.role.toLowerCase(),
+    );
   }
 
   async getUserPagesByUserId(user_id: number): Promise<Pages[]> {

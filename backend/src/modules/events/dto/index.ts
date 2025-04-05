@@ -14,8 +14,6 @@ export class SaveTransactionsDto {
   @ValidateNested({ each: true })
   @Type(() => TransactionDto)
   transactions: TransactionDto[];
-  @IsNumber()
-  page_id: number;
 }
 
 export class TransactionDto {
