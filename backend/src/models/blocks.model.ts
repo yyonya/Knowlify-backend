@@ -26,14 +26,29 @@ export class Blocks extends Model {
   })
   content: Record<string, any>;
 
-  @Column
-  col_position: number;
+  @Column({
+    type: DataType.NUMBER,
+    allowNull: true,
+  })
+  pointer_to: number | null;
 
   @Column
-  row_position: number;
+  is_head: boolean;
 
   @Column
-  width: number;
+  is_tail: boolean;
+
+  @Column({
+    type: DataType.NUMBER,
+    allowNull: true,
+  })
+  database_y: number | null;
+
+  @Column({
+    type: DataType.NUMBER,
+    allowNull: true,
+  })
+  database_x: number | null;
 
   @ForeignKey(() => Pages)
   @Column

@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateWorkspaceDto {
   @IsNumber()
@@ -27,14 +27,27 @@ export class CreateWorkspaceMemberDto {
 
 export class CreateBlockDto {
   //TODO перенести в другое дто (или нет)
-  @IsNumber()
+  @IsString()
   type: string;
+
+  @IsBoolean()
+  is_head: boolean;
+
+  @IsOptional()
   @IsNumber()
-  col_position: number;
+  pointer_to: number | null;
+
+  @IsBoolean()
+  is_tail: boolean;
+
+  @IsOptional()
   @IsNumber()
-  row_position: number;
+  database_y: number | null;
+
+  @IsOptional()
   @IsNumber()
-  width: number;
+  database_x: number | null;
+
   @IsNumber()
   page_id: number;
 }

@@ -5,30 +5,31 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  Min,
   ValidateNested,
 } from 'class-validator';
 
-export class SaveTransactionsDto {
+export class TransactionsStorage {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => TransactionDto)
-  transactions: TransactionDto[];
+  @Type(() => Operation)
+  operations: Operation[] = [];
+
+  addOperation(operation: Operation) {
+    this.operations.push(operation);
+  }
+
+  getCount() {
+    return this.operations.length;
+  }
 }
 
-export class TransactionDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TransactionOperationDto)
-  operations: TransactionOperationDto[];
+export class Operation {
+  @IsString()
   @IsOptional()
-  @IsString()
   userAction?: string;
-}
 
-export class TransactionOperationDto {
   @IsString()
-  command: 'update' | 'create' | 'delete';
+  command: 'update' | 'create' | 'delete' | 'change-position';
 
   @ValidateNested()
   @Type((op) => {
@@ -37,13 +38,19 @@ export class TransactionOperationDto {
         return UpdateOperationArgs;
       case 'create':
         return CreateOperationArgs;
+      case 'change-position':
+        return ChangePosOperationArgs;
       case 'delete':
         return DeleteOperationArgs;
       default:
         throw new Error(`Unknown command: ${op?.object.command}`);
     }
   })
-  args: UpdateOperationArgs | CreateOperationArgs | DeleteOperationArgs;
+  args:
+    | UpdateOperationArgs
+    | CreateOperationArgs
+    | DeleteOperationArgs
+    | ChangePosOperationArgs;
 }
 
 class UpdateOperationArgs {
@@ -55,13 +62,26 @@ class UpdateOperationArgs {
   content?: string; // !!! FIX
 }
 
+class ChangePosOperationArgs {
+  @IsNumber()
+  block_id: number;
+
+  @IsNumber()
+  pointer_to: number;
+}
+
 export class CreateOperationArgs {
   @IsString()
   @IsIn(['text', 'bulleted list'])
   type: string;
+
+  @IsOptional()
   @IsNumber()
-  @Min(1)
-  position: number;
+  pointer_to: number | null;
+
+  @IsOptional()
+  @IsString()
+  content?: string; // !!! FIX
 }
 
 class DeleteOperationArgs {

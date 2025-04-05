@@ -9,7 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { TokenService } from '../token/token.service';
 import { ErrorLog } from 'src/errors';
-import { SaveTransactionsDto, TransactionDto } from './dto';
+import { Operation, TransactionsStorage } from './dto';
 import { WorkspaceService } from '../workspace/workspace.service';
 
 @WebSocketGateway(3001, {
@@ -27,9 +27,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
   ) {}
 
   // Хранилище клиентов
-  private clients = new Map<number, Socket>();
+  private clientsStorage = new Map<number, Socket>();
   // Хранилище транзакций по страницам
-  private transactions = new Map<number, TransactionDto[]>();
+  private transactionsStorage = new Map<number, TransactionsStorage>();
 
   afterInit(server: Server) {
     server.use((client: Socket, next) => {
@@ -64,11 +64,11 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
             throw new WsException(ErrorLog.RIGHTS_FAILTURE);
           }
 
-          if (this.clients.has(payload.user_id)) {
+          if (this.clientsStorage.has(payload.user_id)) {
             throw new WsException(ErrorLog.WS_CONNECTION);
           }
 
-          this.clients.set(payload.user_id, client);
+          this.clientsStorage.set(payload.user_id, client);
           client.data = { user_id: payload.user_id };
 
           await client.join(roomId.toString());
@@ -89,8 +89,8 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
   handleDisconnect(client: Socket) {
     if ((client.data as { user_id?: number })?.user_id) {
       const user_id = (client.data as { user_id: number }).user_id;
-      if (this.clients.get(user_id)?.id === client.id) {
-        this.clients.delete(user_id);
+      if (this.clientsStorage.get(user_id)?.id === client.id) {
+        this.clientsStorage.delete(user_id);
         console.log(
           `Client disconnected - User ID: ${user_id}, Socket ID: ${client.id}`,
         );
@@ -106,9 +106,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
 
   // Добавление транзакции
   @SubscribeMessage('add-transaction')
-  handleTransaction(client: Socket, payload: SaveTransactionsDto) {
-    const { transactions } = payload;
-
+  handleTransaction(client: Socket, operation: Operation) {
     const userRooms = Array.from(client.rooms).filter(
       (room) => room !== client.id,
     );
@@ -120,17 +118,18 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
     const [userRoom] = userRooms;
     const usersRoom = Number(userRoom);
 
-    if (!this.transactions.has(usersRoom)) {
-      this.transactions.set(usersRoom, []);
+    if (!this.transactionsStorage.has(usersRoom)) {
+      this.transactionsStorage.set(usersRoom, new TransactionsStorage());
     }
-    const pageTransactions = this.transactions.get(usersRoom);
-    pageTransactions?.push(...transactions); //?
+
+    const pageTransactions = this.transactionsStorage.get(usersRoom);
+    pageTransactions?.addOperation(operation); //?
     console.log(pageTransactions);
+    console.log(operation);
+    // this.server.to(userRoom).emit('transaction-added', {
+    //   count: pageTransactions?.getCount(),
+    // });
 
-    this.server.to(userRoom).emit('transaction-added', {
-      count: pageTransactions?.length,
-    });
-
-    return { status: 'success', count: pageTransactions?.length };
+    return { status: 'success', count: pageTransactions?.getCount() };
   }
 }
