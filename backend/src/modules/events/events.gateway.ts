@@ -7,10 +7,9 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { TokenService } from '../token/token.service';
 import { ErrorLog } from 'src/errors';
 import { Operation, TransactionsStorage } from './dto';
-import { WorkspaceService } from '../workspace/workspace.service';
+import { EventsService } from './events.service';
 
 @WebSocketGateway(3001, {
   cors: {
@@ -21,10 +20,7 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  constructor(
-    private readonly tokenService: TokenService,
-    private readonly workspaceService: WorkspaceService,
-  ) {}
+  constructor(private readonly eventsService: EventsService) {}
 
   // Хранилище клиентов
   private clientsStorage = new Map<number, Socket>();
@@ -36,33 +32,12 @@ export class EventsGateway implements OnGatewayInit, OnGatewayDisconnect {
       void (async () => {
         // IIFE + void для игнорирования Promise
         try {
-          const authHeader = client.handshake.headers.authorization;
-          const { page_id } = client.handshake.query;
-          const [type, token] = authHeader?.split(' ') ?? [];
-
-          if (
-            type !== 'Bearer' ||
-            !token ||
-            !page_id ||
-            Array.isArray(page_id)
-          ) {
-            throw new WsException(ErrorLog.WS_PARAMS);
-          }
-
-          const roomId = Number(page_id);
-          if (isNaN(roomId)) {
-            throw new WsException(ErrorLog.WS_PARAMS);
-          }
-
-          const payload = this.tokenService.verifyJwtToken(token);
-          const right = await this.workspaceService.checkRightConnectToPage(
-            payload.user_id,
-            roomId,
+          const answer = await this.eventsService.verifyUserForWS(
+            client.handshake.headers.authorization,
+            client.handshake.query,
           );
-
-          if (!right) {
-            throw new WsException(ErrorLog.RIGHTS_FAILTURE);
-          }
+          const payload = answer.payload;
+          const roomId = answer.roomId;
 
           if (this.clientsStorage.has(payload.user_id)) {
             throw new WsException(ErrorLog.WS_CONNECTION);
